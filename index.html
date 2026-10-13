@@ -1,0 +1,427 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CheckList | Mods Minecraft</title>
+<style>
+:root {
+  --bg: #09080d;
+  --purple: #a855f7;
+  --text: #f7f3ff;
+  --muted: #a7a0b8;
+  --line: #302741;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  padding: 25px 14px 45px;
+  background: radial-gradient(ellipse at top, #25123e, #0c0913 48%, #07070a);
+  color: var(--text);
+  font-family: Arial, Helvetica, sans-serif;
+  min-height: 100vh;
+}
+main { max-width: 850px; margin: auto; }
+.top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.logo {
+  color: #c084fc;
+  font-size: 13px;
+  letter-spacing: 3px;
+  font-weight: 900;
+}
+.pill {
+  border: 1px solid #49335f;
+  border-radius: 30px;
+  padding: 7px 12px;
+  color: #d8b4fe;
+  font-size: 12px;
+}
+h1 {
+  font-size: clamp(32px, 6vw, 48px);
+  line-height: 1.05;
+  margin: 25px 0 8px;
+  letter-spacing: -1px;
+}
+h1 span {
+  background: linear-gradient(90deg, #c084fc, #e879f9);
+  color: transparent;
+  background-clip: text;
+}
+.sub { color: var(--muted); margin-bottom: 24px; }
+.panel {
+  background: #100d18;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 18px;
+  margin-bottom: 16px;
+  box-shadow: 0 18px 60px #0005;
+}
+.stats {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 13px;
+  color: #c4b5d9;
+  margin-bottom: 10px;
+}
+.track {
+  height: 9px;
+  border-radius: 20px;
+  background: #2a2136;
+  overflow: hidden;
+}
+.fill {
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, #9333ea, #e879f9);
+  transition: width .2s;
+}
+.controls {
+  display: flex;
+  gap: 9px;
+  flex-wrap: wrap;
+  margin-top: 15px;
+}
+button, input {
+  font: inherit;
+  border-radius: 11px;
+  border: 1px solid #41304f;
+  background: #1a1425;
+  color: var(--text);
+  padding: 11px 13px;
+}
+button { cursor: pointer; transition: .15s; }
+button:hover { border-color: #c084fc; }
+.primary {
+  background: linear-gradient(120deg, #7e22ce, #a21caf);
+  border: 0;
+  font-weight: bold;
+}
+.danger { color: #fda4af; }
+.addrow { display: flex; gap: 8px; margin-bottom: 14px; }
+.addrow input { flex: 1; min-width: 0; outline: none; }
+.addrow input:focus { border-color: var(--purple); }
+.list { display: grid; gap: 8px; }
+.item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px;
+  background: linear-gradient(120deg, #171220, #120f19);
+  border: 1px solid #292034;
+  border-radius: 12px;
+  cursor: pointer;
+  min-width: 0;
+  transition: .15s;
+}
+.item:hover { border-color: #8b5cf6; }
+.item.checked { opacity: .65; background: #100e15; }
+.item input {
+  accent-color: #c084fc;
+  width: 17px;
+  height: 17px;
+  padding: 0;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.modname { overflow-wrap: anywhere; flex: 1; font-size: 14px; }
+.checked .modname { text-decoration: line-through; color: #a69ab7; }
+.copyhint { color: #9f8bb5; font-size: 11px; white-space: nowrap; }
+.footer {
+  color: #82778f;
+  font-size: 12px;
+  text-align: center;
+  margin-top: 18px;
+}
+@media(max-width:520px) {
+  body { padding: 18px 10px 35px; }
+  .panel { padding: 13px; }
+  .copyhint { display: none; }
+  .controls button { flex: 1; }
+}
+</style>
+</head>
+<body>
+<main>
+  <div class="top">
+    <div class="logo">◆ MODS CHECKLIST</div>
+    <div class="pill">MINECRAFT · NEOFORGE</div>
+  </div>
+
+  <h1>Marca. <span>Copia.</span><br>Compartilha.</h1>
+  <p class="sub">Clica num mod para copiar o nome dele e marcar como concluído.</p>
+
+  <section class="panel">
+    <div class="stats">
+      <span id="count">0 de 0 marcados</span>
+      <span id="percent">0%</span>
+    </div>
+    <div class="track"><div class="fill" id="fill"></div></div>
+    <div class="controls">
+      <button class="primary" id="copyAll">📋 Copiar lista inteira</button>
+      <button id="share">🔗 Copiar link</button>
+      <button class="danger" id="reset">↺ Desmarcar tudo</button>
+    </div>
+  </section>
+
+  <section class="panel">
+    <form class="addrow" id="addForm">
+      <input id="newMod" placeholder="Adicionar outro mod..." maxlength="180" autocomplete="off">
+      <button class="primary" type="submit">＋ Adicionar</button>
+    </form>
+    <div class="list" id="list"></div>
+  </section>
+
+  <div class="footer">
+    O progresso fica salvo neste navegador. O link compartilhado leva a lista e as marcações.
+  </div>
+</main>
+
+<script>
+const initialMods = [
+  "ChoiceTheorem's Overhauled Village",
+  "AmbientSounds",
+  "Another Furniture",
+  "AppleSkin",
+  "Architectury",
+  "Artifacts",
+  "Athena",
+  "Balm",
+  "Beautify",
+  "BetterF3",
+  "Bookshelf",
+  "Carry On",
+  "Chipped",
+  "Cloth Config",
+  "Controlling",
+  "Cosmetic Armor Reworked",
+  "CreativeCore",
+  "Cristel Lib",
+  "Cupboard",
+  "Decorative Blocks Reborn",
+  "Dynamic FPS",
+  "Dynamic Lights",
+  "Eating Animation",
+  "Enchantment Descriptions",
+  "Entity Culling",
+  "Explorer's Compass",
+  "Falling Leaves",
+  "Farmer's Delight",
+  "FerriteCore",
+  "FramedBlocks",
+  "FTB Library",
+  "FTB Ultimine",
+  "Fusion",
+  "GML",
+  "Handcrafted",
+  "Iceberg",
+  "ImmediatelyFast",
+  "Immersive Armor HUD",
+  "Inventory Profiles Next",
+  "Iron Chests",
+  "Iron Furnaces",
+  "Jade",
+  "JEI",
+  "Kotlin for Forge",
+  "Legendary Tooltips",
+  "libIPN",
+  "Lithium",
+  "Lithostitched",
+  "Loot Integration WDA",
+  "Loot Integrations",
+  "Macaw's Bridges",
+  "Macaw's Doors",
+  "Macaw's Furniture",
+  "Macaw's Roofs",
+  "Moonlight Lib",
+  "More Culling",
+  "Mouse Tweaks",
+  "Nature's Compass",
+  "Not Enough Animations",
+  "Particle Effects",
+  "PneumaticCraft: Repressurized",
+  "Prickle",
+  "Prism",
+  "Puzzles Lib",
+  "Rechiseled",
+  "Repurposed Structures: PneumaticCraft Integration",
+  "Repurposed Structures",
+  "Resource Gamma Utils",
+  "Resourceful Lib",
+  "Searchables",
+  "Shulker Box Tooltip",
+  "3D Skin Layers",
+  "Sodium",
+  "Sophisticated Backpacks",
+  "Sophisticated Core",
+  "Sound Physics Remastered",
+  "Spatial GUI",
+  "SuperMartijn642's Config Lib",
+  "SuperMartijn642's Core Lib",
+  "Supplementaries",
+  "Towns and Towers",
+  "Terralith",
+  "Txnilib",
+  "Visual Workbench",
+  "Wall Lanterns",
+  "Waystones",
+  "Xaero's Minimap",
+  "Xaero's World Map",
+  "YetAnotherConfigLib",
+  "YUNG's API",
+  "Lanterns Belong on Walls"
+];
+
+const STORAGE_KEY = "mods-checklist-v2";
+let mods = [...initialMods];
+let checked = new Set();
+
+function loadData() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    if (saved && Array.isArray(saved.mods)) {
+      mods = saved.mods;
+      checked = new Set(saved.checked || []);
+    }
+  } catch (error) {}
+
+  const encoded = new URLSearchParams(location.search).get("data");
+  if (encoded) {
+    try {
+      const data = JSON.parse(decodeURIComponent(escape(atob(encoded))));
+      if (Array.isArray(data.mods)) {
+        mods = data.mods;
+        checked = new Set(data.checked || []);
+      }
+    } catch (error) {}
+  }
+}
+
+function saveData() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      mods,
+      checked: [...checked]
+    }));
+  } catch (error) {}
+}
+
+function render() {
+  const list = document.getElementById("list");
+  list.innerHTML = "";
+
+  mods.forEach((name, index) => {
+    const row = document.createElement("div");
+    row.className = "item" + (checked.has(index) ? " checked" : "");
+    row.tabIndex = 0;
+    row.setAttribute("role", "checkbox");
+    row.setAttribute("aria-checked", checked.has(index));
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.checked = checked.has(index);
+    checkbox.tabIndex = -1;
+
+    const label = document.createElement("span");
+    label.className = "modname";
+    label.textContent = name;
+
+    const hint = document.createElement("span");
+    hint.className = "copyhint";
+    hint.textContent = checked.has(index) ? "✓ copiado" : "clicar para copiar";
+
+    row.append(checkbox, label, hint);
+
+    row.addEventListener("click", () => toggleMod(index));
+    row.addEventListener("keydown", event => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        toggleMod(index);
+      }
+    });
+
+    list.appendChild(row);
+  });
+
+  const total = mods.length;
+  const completed = checked.size;
+  const percent = total ? Math.round(completed / total * 100) : 0;
+
+  document.getElementById("count").textContent =
+    `${completed} de ${total} marcados`;
+  document.getElementById("percent").textContent = percent + "%";
+  document.getElementById("fill").style.width = percent + "%";
+
+  saveData();
+}
+
+async function copyText(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch (error) {
+    const area = document.createElement("textarea");
+    area.value = text;
+    area.style.position = "fixed";
+    area.style.opacity = "0";
+    document.body.appendChild(area);
+    area.select();
+    document.execCommand("copy");
+    area.remove();
+  }
+}
+
+async function toggleMod(index) {
+  if (checked.has(index)) {
+    checked.delete(index);
+  } else {
+    await copyText(mods[index]);
+    checked.add(index);
+  }
+  render();
+}
+
+document.getElementById("addForm").addEventListener("submit", event => {
+  event.preventDefault();
+  const input = document.getElementById("newMod");
+  const name = input.value.trim();
+  if (!name) return;
+
+  mods.push(name);
+  input.value = "";
+  render();
+});
+
+document.getElementById("copyAll").addEventListener("click", () => {
+  copyText(mods.join("\n"));
+});
+
+document.getElementById("reset").addEventListener("click", () => {
+  if (confirm("Desmarcar todos os mods?")) {
+    checked.clear();
+    render();
+  }
+});
+
+document.getElementById("share").addEventListener("click", async () => {
+  const data = btoa(unescape(encodeURIComponent(JSON.stringify({
+    mods,
+    checked: [...checked]
+  }))));
+
+  const url = location.href.split("?")[0] + "?data=" + encodeURIComponent(data);
+  await copyText(url);
+  alert("Link copiado! Envie para seu amigo.");
+});
+
+loadData();
+render();
+</script>
+</body>
+</html>
